@@ -71,14 +71,27 @@
         private static final int ESTADO_RELACIONAL_MAYOR_IGUAL_1 = 64;
         private static final int ESTADO_RELACIONAL_MAYOR_IGUAL_2 = 65;
         private static final int ESTADO_RELACIONAL_IGUAL_1 = 66;
-        private static final int ESTADO_RELACIONAL_DIFERENCIA_1 = 67;
+        private static final int ESTADO_RELACIONAL_DIFERENCIA_NEGACION_1 = 67;
         private static final int ESTADO_RELACIONAL_DIFERENCIA_2 = 68;
         private static final int ESTADO_ASIGNACION_1 = 69;
+        private static final int ESTADO_AND_1 = 70;
+        private static final int ESTADO_AND_2 = 71;
+        private static final int ESTADO_OR_1 = 72;
+        private static final int ESTADO_OR_2 = 73;
+        private static final int ESTADO_ARITMETICO_SUMA_INCREMENTO_1 = 74;
+        private static final int ESTADO_ARITMETICO_RESTA_DECREMENTO_1 = 75;
+        private static final int ESTADO_ARITMETICO_DIVISION_COMENTARIO_SIMPLE_1 = 76;
+        private static final int ESTADO_ARITMETICO_MULTI_1 = 77;
+        private static final int ESTADO_ARITMETICO_MODULO_1 = 78;
+        private static final int ESTADO_INCREMENTO_2 = 79;
+        private static final int ESTADO_DECREMENTO_2 = 80;
+        private static final int ESTADO_COMENTARIO_SIMPLE_2 = 81;
+
 
         private int estadoActual;
-        private int contadorPalabrasReservadas, contadorMenor, contadorMenorIgual,
-                contadorMayorIgual, contadorMayor, contadorIgual, contadorDiferente,
-                contadorAsignacion;
+        private int contadorPalabrasReservadas, contadorRelacionales, contadorAsignacion,
+                contadorLogico, contadorIncremento, contadorAritmetico, contadorDecimales,
+                contadorDecremento, contadorComentarioSimple, contadorEnteros;
         private JTextArea texto;
 
         public sistema3_automatas() {
@@ -108,30 +121,54 @@
 
             // Etiqueta para las palabras reservadas
             JLabel PalabrasReservadas = new JLabel("Palabras reservadas: 0");
-            JLabel Relacional1 = new JLabel("<: 0");
-            JLabel Relacional2 = new JLabel("<=: 0");
-            JLabel Relacional3 = new JLabel(">: 0");
-            JLabel Relacional4 = new JLabel(">=: 0");
-            JLabel Relacional5 = new JLabel("==: 0");
-            JLabel Relacional6 = new JLabel("!=: 0");
-            JLabel Asignacion = new JLabel("=: 0");
+            JLabel Relacionales = new JLabel("Operadores relacionales: 0");
+            JLabel Asignacion = new JLabel("Asignaciones: 0");
+            JLabel logicos = new JLabel("Operadores logicos: 0");
+            JLabel aritmeticos = new JLabel("Operadores Aritmeticos: 0");
+            JLabel identificadores = new JLabel("Identificadores: 0");
+            JLabel enteros = new JLabel("Numeros enteros: 0");
+            JLabel decimales = new JLabel("mul: 0");
+            JLabel incremento = new JLabel("Incrementos: 0");
+            JLabel decremento = new JLabel("Decrementos: 0");
+            JLabel cadena = new JLabel("cadenas de caracteres: 0");
+            JLabel comentarioBox = new JLabel("comentarios: 0");
+            JLabel comentarioLine = new JLabel("Comentarios simples: 0");
+            JLabel parentesis = new JLabel("parentesis: 0");
+            JLabel llaves = new JLabel("llaves: 0");
+            JLabel errores = new JLabel("errores: 0");
             PalabrasReservadas.setBounds(1050, 10, 200, 30);
-            Relacional1.setBounds(1050, 30, 200, 30);
-            Relacional2.setBounds(1050, 50, 200, 30);
-            Relacional3.setBounds(1050, 70, 200, 30);
-            Relacional4.setBounds(1050, 90, 200, 30);
-            Relacional5.setBounds(1050, 110, 200, 30);
-            Relacional6.setBounds(1050, 130, 200, 30);
-            Asignacion.setBounds(1050, 150, 200, 30);
+            identificadores.setBounds(1050, 30, 200, 30);
+            Relacionales.setBounds(1050, 50, 200, 30);
+            logicos.setBounds(1050, 70, 200, 30);
+            aritmeticos.setBounds(1050, 90, 200, 30);
+            Asignacion.setBounds(1050, 110, 200, 30);
+            enteros.setBounds(1050, 130, 200, 30);
+            decimales.setBounds(1050, 150, 200, 30);
+            incremento.setBounds(1050, 170, 200, 30);
+            decremento.setBounds(1050, 190, 200, 30);
+            cadena.setBounds(1050, 210, 200, 30);
+            comentarioBox.setBounds(1050, 230, 200, 30);
+            comentarioLine.setBounds(1050, 250, 200, 30);
+            parentesis.setBounds(1050, 270, 200, 30);
+            llaves.setBounds(1050, 290, 200, 30);
+            errores.setBounds(1050, 310, 200, 30);
 
             add(PalabrasReservadas);
-            add(Relacional1);
-            add(Relacional2);
-            add(Relacional3);
-            add(Relacional4);
-            add(Relacional5);
-            add(Relacional6);
+            add(Relacionales);
             add(Asignacion);
+            add(logicos);
+            add(identificadores);
+            add(aritmeticos);
+            add(enteros);
+            add(decimales);
+            add(incremento);
+            add(decremento);
+            add(cadena);
+            add(comentarioBox);
+            add(comentarioLine);
+            add(parentesis);
+            add(llaves);
+            add(errores);
 
             // Crear el botón
             JButton botonAnalizar = new JButton("Analizar");
@@ -140,13 +177,16 @@
                 String textoAnalizar = texto.getText();
                 analizar(textoAnalizar);
                 PalabrasReservadas.setText("Palabras reservadas: " + contadorPalabrasReservadas);
-                Relacional1.setText("<:" + contadorMenor);
-                Relacional2.setText("<=:" + contadorMenorIgual);
-                Relacional3.setText(">:" + contadorMayor);
-                Relacional4.setText(">=:" + contadorMayorIgual);
-                Relacional5.setText("==:" + contadorIgual);
-                Relacional6.setText("!=:" + contadorDiferente);
-                Asignacion.setText("=:" + contadorAsignacion);
+                Relacionales.setText("Operadores relacionales: " + contadorRelacionales);
+                Asignacion.setText("Asignaciones: " + contadorAsignacion);
+                logicos.setText("Operadores Logicos: " + contadorLogico);
+                aritmeticos.setText("Operadores aritmeticos: "+ contadorAritmetico);
+                enteros.setText("Numeros enteros: "+ contadorEnteros);
+                incremento.setText("Incrementos: "+ contadorIncremento);
+                decremento.setText("Decrementos: "+ contadorDecremento);
+                decimales.setText("Numeros decimales: " + contadorDecimales);
+                comentarioLine.setText("Comentarios simples: " + contadorComentarioSimple);
+
             });
             add(botonAnalizar);
 
@@ -177,13 +217,13 @@
         public void analizar(String texto) {
             // Reiniciar contadores
             contadorPalabrasReservadas = 0;
-            contadorMenor = 0;
-            contadorMenorIgual = 0;
-            contadorMayor = 0;
-            contadorMayorIgual = 0;
-            contadorIgual = 0;
-            contadorDiferente = 0;
+            contadorRelacionales = 0;
             contadorAsignacion = 0;
+            contadorLogico = 0;
+            contadorIncremento = 0;
+            contadorDecremento = 0;
+            contadorComentarioSimple = 0;
+            contadorAritmetico = 0;
             estadoActual = ESTADO_INICIAL;
 
             char[] caracteres = texto.toCharArray();
@@ -205,12 +245,19 @@
                         else if (caracter == '<') estadoActual = ESTADO_RELACIONAL_MENOR_IGUAL_1;
                         else if (caracter == '>') estadoActual = ESTADO_RELACIONAL_MAYOR_IGUAL_1;
                         else if (caracter == '=') estadoActual = ESTADO_ASIGNACION_1;
-                        else if (caracter == '!') estadoActual = ESTADO_RELACIONAL_DIFERENCIA_1;
+                        else if (caracter == '!') estadoActual = ESTADO_RELACIONAL_DIFERENCIA_NEGACION_1;
+                        else if (caracter == '&') estadoActual = ESTADO_AND_1;
+                        else if (caracter == '|') estadoActual = ESTADO_OR_1;
+                        else if (caracter == '+') estadoActual = ESTADO_ARITMETICO_SUMA_INCREMENTO_1;
+                        else if (caracter == '-') estadoActual = ESTADO_ARITMETICO_RESTA_DECREMENTO_1;
+                        else if (caracter == '/') estadoActual = ESTADO_ARITMETICO_DIVISION_COMENTARIO_SIMPLE_1;
+                        else if (caracter == '%') estadoActual = ESTADO_ARITMETICO_MODULO_1;
+                        else if (caracter == '*') estadoActual = ESTADO_ARITMETICO_MULTI_1;
                         break;
                     case ESTADO_IF_INT_1:
                         if (caracter == 'f') estadoActual = ESTADO_IF_2;
-                        else if (caracter == 'n') estadoActual = ESTADO_INT_2 ;
-                         else estadoActual = ESTADO_INICIAL;
+                        else if (caracter == 'n') estadoActual = ESTADO_INT_2;
+                        else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_IF_2:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
@@ -301,7 +348,7 @@
                         break;
                     case ESTADO_DEFAULT_DO_DOUBLE_1:
                         if (caracter == 'e') estadoActual = ESTADO_DEFAULT_2;
-                        else if (caracter == 'o')estadoActual = ESTADO_DO_DOUBLE_2;
+                        else if (caracter == 'o') estadoActual = ESTADO_DO_DOUBLE_2;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_DEFAULT_2:
@@ -461,8 +508,10 @@
                     case ESTADO_CHAR_4:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
                         }
-                        estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_PRINT_1:
                         if (caracter == 'r') estadoActual = ESTADO_PRINT_2;
@@ -483,59 +532,182 @@
                     case ESTADO_PRINT_5:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
                         }
-                        estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_RELACIONAL_MENOR_IGUAL_1:
                         if (caracter == '=') {
                             estadoActual = ESTADO_RELACIONAL_MENOR_IGUAL_2;
+                        } else if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
+                            contadorRelacionales++;
+                            estadoActual = ESTADO_INICIAL;
                         } else {
-                            contadorMenor++;
                             estadoActual = ESTADO_INICIAL;
                         }
                         break;
 
                     case ESTADO_RELACIONAL_MENOR_IGUAL_2:
-                        contadorMenorIgual++;
-                        estadoActual = ESTADO_INICIAL;
+                        if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
+                            contadorRelacionales++;
+                            estadoActual = ESTADO_INICIAL;
+                        } else {
+                            estadoActual = ESTADO_INICIAL;
+                        }
                         break;
                     case ESTADO_RELACIONAL_MAYOR_IGUAL_1:
                         if (caracter == '=') {
                             estadoActual = ESTADO_RELACIONAL_MAYOR_IGUAL_2;
+                        } else if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
+                            contadorRelacionales++;
+                            estadoActual = ESTADO_INICIAL;
                         } else {
-                            contadorMayor++;
                             estadoActual = ESTADO_INICIAL;
                         }
                         break;
 
                     case ESTADO_RELACIONAL_MAYOR_IGUAL_2:
-                        contadorMayorIgual++;
+                        if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
+                        contadorRelacionales++;
                         estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
+                        }
                         break;
                     case ESTADO_ASIGNACION_1:
                         if (caracter == '=') {
                             estadoActual = ESTADO_RELACIONAL_IGUAL_1;
-                        } else {
+                        } else if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
                             contadorAsignacion++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
                             estadoActual = ESTADO_INICIAL;
                         }
                         break;
 
                     case ESTADO_RELACIONAL_IGUAL_1:
-                        contadorIgual++;
-                        estadoActual = ESTADO_INICIAL;
+                        if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
+                            contadorRelacionales++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
+                        }
                         break;
 
-                    case ESTADO_RELACIONAL_DIFERENCIA_1:
+                    case ESTADO_RELACIONAL_DIFERENCIA_NEGACION_1:
                         if (caracter == '=') {
                             estadoActual = ESTADO_RELACIONAL_DIFERENCIA_2;
-                        } else {
+                        } else if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
+                            contadorLogico++;
                             estadoActual = ESTADO_INICIAL;  // No es un operador distinto, ignoramos
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
                         }
                         break;
 
                     case ESTADO_RELACIONAL_DIFERENCIA_2:
-                        contadorDiferente++;
+                        if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
+                            contadorRelacionales++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
+                        }
+                        break;
+                    case ESTADO_AND_1:
+                        if (caracter == '&') {
+                            estadoActual = ESTADO_AND_2;
+                        } else {
+                            estadoActual = ESTADO_INICIAL;  // No es un operador &&, ignoramos
+                        }
+                        break;
+
+                    case ESTADO_AND_2:
+                        if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
+                            contadorLogico++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
+                        }
+                        break;
+                    case ESTADO_OR_1:
+                        if (caracter == '|') {
+                            estadoActual = ESTADO_OR_2;
+                        } else {
+                            estadoActual = ESTADO_INICIAL;  // No es un operador &&, ignoramos
+                        }
+                        break;
+
+                    case ESTADO_OR_2:
+                        if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
+                            contadorLogico++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else{
+                            estadoActual = ESTADO_INICIAL;
+                        }
+                        break;
+                    case ESTADO_ARITMETICO_SUMA_INCREMENTO_1:
+                        if (caracter == '+') {
+                            estadoActual = ESTADO_INCREMENTO_2;
+                        } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
+                            contadorAritmetico++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
+                        }
+                        break;
+
+                    case ESTADO_INCREMENTO_2:
+                        if(caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
+                            contadorIncremento++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
+                        }
+                        break;
+
+                    case ESTADO_ARITMETICO_RESTA_DECREMENTO_1:
+                        if (caracter == '-') {
+                            estadoActual = ESTADO_DECREMENTO_2;
+                        } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
+                            contadorAritmetico++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
+                        }
+                        break;
+
+                    case ESTADO_DECREMENTO_2:
+                        if(caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
+                            contadorDecremento++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
+                        }
+                        break;
+                    case ESTADO_ARITMETICO_DIVISION_COMENTARIO_SIMPLE_1:
+                        if (caracter == '/') {
+                            estadoActual = ESTADO_COMENTARIO_SIMPLE_2;
+                        } else if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
+                            contadorAritmetico++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else {
+                            estadoActual = ESTADO_INICIAL;
+                        }
+                        break;
+
+                    case ESTADO_COMENTARIO_SIMPLE_2:
+                            contadorComentarioSimple++;
+                            estadoActual = ESTADO_INICIAL;
+                        break;
+
+                    case ESTADO_ARITMETICO_MODULO_1:
+                        contadorAritmetico++;
+                        estadoActual = ESTADO_INICIAL;
+                        break;
+
+                    case ESTADO_ARITMETICO_MULTI_1:
+                        contadorAritmetico++;
                         estadoActual = ESTADO_INICIAL;
                         break;
                 }
