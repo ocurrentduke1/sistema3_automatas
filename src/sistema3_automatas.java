@@ -86,12 +86,24 @@
         private static final int ESTADO_INCREMENTO_2 = 79;
         private static final int ESTADO_DECREMENTO_2 = 80;
         private static final int ESTADO_COMENTARIO_SIMPLE_2 = 81;
-
+        private static final int ESTADO_NUMERO_ENTERO_DECIMAL_1 = 82;
+        private static final int ESTADO_NUMERO_DECIMAL_2 = 83;
+        private static final int ESTADO_ERROR = 84;
+        private static final int ESTADO_PARENTESIS_ABIERTO = 85;
+        private static final int ESTADO_PARENTESIS_CERRADO = 86;
+        private static final int ESTADO_CADENA_ABIERTA = 87;
+        private static final int ESTADO_CADENA_CERRADA = 88;
+        private static final int ESTADO_COMENTARIO_BLOQUE_1 = 89;
+        private static final int ESTADO_COMENTARIO_BLOQUE_2 = 90;
+        private static final int ESTADO_LLAVE_ABIERTA = 91;
+        private static final int ESTADO_LLAVE_CERRADA = 92;
 
         private int estadoActual;
         private int contadorPalabrasReservadas, contadorRelacionales, contadorAsignacion,
                 contadorLogico, contadorIncremento, contadorAritmetico, contadorDecimales,
-                contadorDecremento, contadorComentarioSimple, contadorEnteros;
+                contadorDecremento, contadorComentarioSimple, contadorEnteros,contadorParentesis,
+                contadorCadena, contadorComentarioBloque,contadorLlaves;
+
         private JTextArea texto;
 
         public sistema3_automatas() {
@@ -127,14 +139,14 @@
             JLabel aritmeticos = new JLabel("Operadores Aritmeticos: 0");
             JLabel identificadores = new JLabel("Identificadores: 0");
             JLabel enteros = new JLabel("Numeros enteros: 0");
-            JLabel decimales = new JLabel("mul: 0");
+            JLabel decimales = new JLabel("Numeros decimales: 0");
             JLabel incremento = new JLabel("Incrementos: 0");
             JLabel decremento = new JLabel("Decrementos: 0");
-            JLabel cadena = new JLabel("cadenas de caracteres: 0");
-            JLabel comentarioBox = new JLabel("comentarios: 0");
+            JLabel cadena = new JLabel("Cadenas de caracteres: 0");
+            JLabel comentarioBox = new JLabel("Comentarios: 0");
             JLabel comentarioLine = new JLabel("Comentarios simples: 0");
-            JLabel parentesis = new JLabel("parentesis: 0");
-            JLabel llaves = new JLabel("llaves: 0");
+            JLabel parentesis = new JLabel("Parentesis: 0");
+            JLabel llaves = new JLabel("Llaves: 0");
             JLabel errores = new JLabel("errores: 0");
             PalabrasReservadas.setBounds(1050, 10, 200, 30);
             identificadores.setBounds(1050, 30, 200, 30);
@@ -186,6 +198,10 @@
                 decremento.setText("Decrementos: "+ contadorDecremento);
                 decimales.setText("Numeros decimales: " + contadorDecimales);
                 comentarioLine.setText("Comentarios simples: " + contadorComentarioSimple);
+                parentesis.setText("Parentesis: " + contadorParentesis);
+                cadena.setText("Cadenas de caracteres: " + contadorCadena);
+                comentarioBox.setText("Comentarios: " + contadorComentarioBloque);
+                llaves.setText("Llaves: "+ contadorLlaves);
 
             });
             add(botonAnalizar);
@@ -224,6 +240,12 @@
             contadorDecremento = 0;
             contadorComentarioSimple = 0;
             contadorAritmetico = 0;
+            contadorEnteros = 0;
+            contadorDecimales = 0;
+            contadorParentesis = 0;
+            contadorCadena = 0;
+            contadorComentarioBloque = 0;
+            contadorLlaves = 0;
             estadoActual = ESTADO_INICIAL;
 
             char[] caracteres = texto.toCharArray();
@@ -253,6 +275,14 @@
                         else if (caracter == '/') estadoActual = ESTADO_ARITMETICO_DIVISION_COMENTARIO_SIMPLE_1;
                         else if (caracter == '%') estadoActual = ESTADO_ARITMETICO_MODULO_1;
                         else if (caracter == '*') estadoActual = ESTADO_ARITMETICO_MULTI_1;
+                        else if (caracter == '(') estadoActual = ESTADO_PARENTESIS_ABIERTO;
+                        else if (caracter == ')') estadoActual = ESTADO_PARENTESIS_CERRADO;
+                        else if (caracter == '"') estadoActual = ESTADO_CADENA_ABIERTA;
+                        else if (caracter == '{') estadoActual = ESTADO_LLAVE_ABIERTA;
+                        else if (caracter == '}') estadoActual = ESTADO_LLAVE_CERRADA;
+                        else if (Character.isDigit(caracter)) {
+                            estadoActual = ESTADO_NUMERO_ENTERO_DECIMAL_1;
+                        }
                         break;
                     case ESTADO_IF_INT_1:
                         if (caracter == 'f') estadoActual = ESTADO_IF_2;
@@ -669,10 +699,12 @@
                     case ESTADO_ARITMETICO_RESTA_DECREMENTO_1:
                         if (caracter == '-') {
                             estadoActual = ESTADO_DECREMENTO_2;
-                        } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
+                        } else if(caracter == ' ' || caracter == '\n'){
                             contadorAritmetico++;
                             estadoActual = ESTADO_INICIAL;
-                        }else {
+                        }else if(Character.isDigit(caracter)){
+                            estadoActual = ESTADO_NUMERO_ENTERO_DECIMAL_1;
+                        }else{
                             estadoActual = ESTADO_INICIAL;
                         }
                         break;
@@ -688,6 +720,8 @@
                     case ESTADO_ARITMETICO_DIVISION_COMENTARIO_SIMPLE_1:
                         if (caracter == '/') {
                             estadoActual = ESTADO_COMENTARIO_SIMPLE_2;
+                        } else if(caracter == '*'){
+                            estadoActual = ESTADO_COMENTARIO_BLOQUE_1;
                         } else if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
                             contadorAritmetico++;
                             estadoActual = ESTADO_INICIAL;
@@ -697,8 +731,12 @@
                         break;
 
                     case ESTADO_COMENTARIO_SIMPLE_2:
+                        if(caracter != '\n' ){
+                            // Permanecer en el mismo estado mientras no se detecte un salto de linea
+                        }else {
                             contadorComentarioSimple++;
                             estadoActual = ESTADO_INICIAL;
+                        }
                         break;
 
                     case ESTADO_ARITMETICO_MODULO_1:
@@ -709,6 +747,75 @@
                     case ESTADO_ARITMETICO_MULTI_1:
                         contadorAritmetico++;
                         estadoActual = ESTADO_INICIAL;
+                        break;
+                    case ESTADO_NUMERO_ENTERO_DECIMAL_1:
+                        if (Character.isDigit(caracter)) {
+                            // Permanecer en el mismo estado mientras se detecten dígitos
+                        } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
+                            contadorEnteros++;
+                            estadoActual = ESTADO_INICIAL;
+                        } else if (caracter == '.') {
+                            estadoActual = ESTADO_NUMERO_DECIMAL_2;
+                        }
+                        break;
+                    case ESTADO_NUMERO_DECIMAL_2:
+                        if(Character.isDigit(caracter)){
+                            // Permanecer en el mismo estado mientras se detecten dígitos
+                        }else if (caracter == '.'){
+                            estadoActual = ESTADO_ERROR;
+                        } else if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
+                            contadorDecimales++;
+                            estadoActual = ESTADO_INICIAL;
+                        }
+                        break;
+                    case ESTADO_ERROR:
+                        if(caracter == ' ' || caracter == '\n' || caracter == '\t'){
+                            estadoActual = ESTADO_INICIAL;
+                        }else{
+                            // Permanecer en el mismo estado mientras se detecten dígitos
+                        }
+                        break;
+                    case ESTADO_PARENTESIS_ABIERTO:
+                        contadorParentesis++;
+                        estadoActual = ESTADO_INICIAL;
+                        break;
+                    case ESTADO_PARENTESIS_CERRADO:
+                        contadorParentesis++;
+                        estadoActual = ESTADO_INICIAL;
+                        break;
+                    case ESTADO_CADENA_ABIERTA:
+                        if(caracter == '"'){
+                            estadoActual = ESTADO_CADENA_CERRADA;
+                        }else{
+                            //continuar en este estado hasta encontrar otras comillas
+                        }
+                        break;
+                    case ESTADO_CADENA_CERRADA:
+                        contadorCadena++;
+                        estadoActual = ESTADO_INICIAL;
+                        break;
+                    case ESTADO_COMENTARIO_BLOQUE_1:
+                        if(caracter != '*'){
+                            //mantener el estado hasta encontrar un asterisco
+                        }else{
+                            estadoActual = ESTADO_COMENTARIO_BLOQUE_2;
+                        }
+                        break;
+                    case ESTADO_COMENTARIO_BLOQUE_2:
+                        if(caracter == '/'){
+                            contadorComentarioBloque++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else{
+                            estadoActual = ESTADO_COMENTARIO_BLOQUE_1;
+                        }
+                        break;
+                    case ESTADO_LLAVE_ABIERTA:
+                            contadorLlaves++;
+                            estadoActual = ESTADO_INICIAL;
+                        break;
+                    case ESTADO_LLAVE_CERRADA:
+                            contadorLlaves++;
+                            estadoActual = ESTADO_INICIAL;
                         break;
                 }
             }
