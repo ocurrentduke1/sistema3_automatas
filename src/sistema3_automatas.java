@@ -97,12 +97,14 @@
         private static final int ESTADO_COMENTARIO_BLOQUE_2 = 90;
         private static final int ESTADO_LLAVE_ABIERTA = 91;
         private static final int ESTADO_LLAVE_CERRADA = 92;
+        private static final int ESTADO_IDENTIFICADORES = 93;
 
         private int estadoActual;
         private int contadorPalabrasReservadas, contadorRelacionales, contadorAsignacion,
                 contadorLogico, contadorIncremento, contadorAritmetico, contadorDecimales,
                 contadorDecremento, contadorComentarioSimple, contadorEnteros,contadorParentesis,
-                contadorCadena, contadorComentarioBloque,contadorLlaves;
+                contadorCadena, contadorComentarioBloque,contadorLlaves, contadorIdentificadores,
+                contadorErrores;
 
         private JTextArea texto;
 
@@ -147,7 +149,7 @@
             JLabel comentarioLine = new JLabel("Comentarios simples: 0");
             JLabel parentesis = new JLabel("Parentesis: 0");
             JLabel llaves = new JLabel("Llaves: 0");
-            JLabel errores = new JLabel("errores: 0");
+            JLabel errores = new JLabel("Errores: 0");
             PalabrasReservadas.setBounds(1050, 10, 200, 30);
             identificadores.setBounds(1050, 30, 200, 30);
             Relacionales.setBounds(1050, 50, 200, 30);
@@ -202,6 +204,8 @@
                 cadena.setText("Cadenas de caracteres: " + contadorCadena);
                 comentarioBox.setText("Comentarios: " + contadorComentarioBloque);
                 llaves.setText("Llaves: "+ contadorLlaves);
+                identificadores.setText("Identificadores: " + contadorIdentificadores);
+                errores.setText("Errores: " + contadorErrores);
 
             });
             add(botonAnalizar);
@@ -246,6 +250,8 @@
             contadorCadena = 0;
             contadorComentarioBloque = 0;
             contadorLlaves = 0;
+            contadorIdentificadores = 0;
+            contadorErrores = 0;
             estadoActual = ESTADO_INICIAL;
 
             char[] caracteres = texto.toCharArray();
@@ -280,290 +286,360 @@
                         else if (caracter == '"') estadoActual = ESTADO_CADENA_ABIERTA;
                         else if (caracter == '{') estadoActual = ESTADO_LLAVE_ABIERTA;
                         else if (caracter == '}') estadoActual = ESTADO_LLAVE_CERRADA;
-                        else if (Character.isDigit(caracter)) {
-                            estadoActual = ESTADO_NUMERO_ENTERO_DECIMAL_1;
-                        }
+                        else if (Character.isDigit(caracter)) estadoActual = ESTADO_NUMERO_ENTERO_DECIMAL_1;
+                        else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
                         break;
                     case ESTADO_IF_INT_1:
                         if (caracter == 'f') estadoActual = ESTADO_IF_2;
                         else if (caracter == 'n') estadoActual = ESTADO_INT_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_IF_2:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else {
+                            estadoActual = ESTADO_INICIAL;
                         }
-                        estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_MAIN_1:
                         if (caracter == 'a') estadoActual = ESTADO_MAIN_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_MAIN_2:
                         if (caracter == 'i') estadoActual = ESTADO_MAIN_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_MAIN_3:
                         if (caracter == 'n') estadoActual = ESTADO_MAIN_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_MAIN_4:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_ELSE_1:
                         if (caracter == 'l') estadoActual = ESTADO_ELSE_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_ELSE_2:
                         if (caracter == 's') estadoActual = ESTADO_ELSE_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_ELSE_3:
                         if (caracter == 'e') estadoActual = ESTADO_ELSE_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_ELSE_4:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_SWITCH_1:
                         if (caracter == 'w') estadoActual = ESTADO_SWITCH_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_SWITCH_2:
                         if (caracter == 'i') estadoActual = ESTADO_SWITCH_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_SWITCH_3:
                         if (caracter == 't') estadoActual = ESTADO_SWITCH_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_SWITCH_4:
                         if (caracter == 'c') estadoActual = ESTADO_SWITCH_5;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_SWITCH_5:
                         if (caracter == 'h') estadoActual = ESTADO_SWITCH_6;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_SWITCH_6:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_CASE_CHAR_1:
                         if (caracter == 'a') estadoActual = ESTADO_CASE_2;
                         else if (caracter == 'h') estadoActual = ESTADO_CHAR_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_CASE_2:
                         if (caracter == 's') estadoActual = ESTADO_CASE_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_CASE_3:
                         if (caracter == 'e') estadoActual = ESTADO_CASE_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_CASE_4:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_DEFAULT_DO_DOUBLE_1:
                         if (caracter == 'e') estadoActual = ESTADO_DEFAULT_2;
                         else if (caracter == 'o') estadoActual = ESTADO_DO_DOUBLE_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_DEFAULT_2:
                         if (caracter == 'f') estadoActual = ESTADO_DEFAULT_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_DEFAULT_3:
                         if (caracter == 'a') estadoActual = ESTADO_DEFAULT_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_DEFAULT_4:
                         if (caracter == 'u') estadoActual = ESTADO_DEFAULT_5;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_DEFAULT_5:
                         if (caracter == 'l') estadoActual = ESTADO_DEFAULT_6;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_DEFAULT_6:
                         if (caracter == 't') estadoActual = ESTADO_DEFAULT_7;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_DEFAULT_7:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
+
                         break;
                     case ESTADO_FOR_1:
                         if (caracter == 'o') estadoActual = ESTADO_FOR_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_FOR_2:
                         if (caracter == 'r') estadoActual = ESTADO_FOR_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_FOR_3:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
+
                         break;
                     case ESTADO_DO_DOUBLE_2:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
                             estadoActual = ESTADO_INICIAL;
                         } else if (caracter == 'u') estadoActual = ESTADO_DOUBLE_3;
+                        else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
 
                         break;
                     case ESTADO_WHILE_1:
                         if (caracter == 'h') estadoActual = ESTADO_WHILE_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_WHILE_2:
                         if (caracter == 'i') estadoActual = ESTADO_WHILE_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_WHILE_3:
                         if (caracter == 'l') estadoActual = ESTADO_WHILE_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_WHILE_4:
                         if (caracter == 'e') estadoActual = ESTADO_WHILE_5;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_WHILE_5:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
+
                         break;
                     case ESTADO_BREAK_1:
                         if (caracter == 'r') estadoActual = ESTADO_BREAK_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_BREAK_2:
                         if (caracter == 'e') estadoActual = ESTADO_BREAK_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_BREAK_3:
                         if (caracter == 'a') estadoActual = ESTADO_BREAK_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_BREAK_4:
                         if (caracter == 'k') estadoActual = ESTADO_BREAK_5;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_BREAK_5:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
+
                         break;
                     case ESTADO_INT_2:
                         if (caracter == 't') estadoActual = ESTADO_INT_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_INT_3:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
+
                         break;
                     case ESTADO_STRING_1:
                         if (caracter == 't') estadoActual = ESTADO_STRING_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_STRING_2:
                         if (caracter == 'r') estadoActual = ESTADO_STRING_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_STRING_3:
                         if (caracter == 'i') estadoActual = ESTADO_STRING_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_STRING_4:
                         if (caracter == 'n') estadoActual = ESTADO_STRING_5;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_STRING_5:
                         if (caracter == 'g') estadoActual = ESTADO_STRING_6;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_STRING_6:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
+
                         break;
                     case ESTADO_DOUBLE_3:
                         if (caracter == 'b') estadoActual = ESTADO_DOUBLE_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
+
                         break;
                     case ESTADO_DOUBLE_4:
                         if (caracter == 'l') estadoActual = ESTADO_DOUBLE_5;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_DOUBLE_5:
                         if (caracter == 'e') estadoActual = ESTADO_DOUBLE_6;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_DOUBLE_6:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
-                        }
-                        estadoActual = ESTADO_INICIAL;
+                            estadoActual = ESTADO_INICIAL;
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else estadoActual = ESTADO_INICIAL;
+
                         break;
                     case ESTADO_CHAR_2:
                         if (caracter == 'a') estadoActual = ESTADO_CHAR_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_CHAR_3:
                         if (caracter == 'r') estadoActual = ESTADO_CHAR_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_CHAR_4:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
                             estadoActual = ESTADO_INICIAL;
-                        }else {
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else {
                             estadoActual = ESTADO_INICIAL;
                         }
                         break;
                     case ESTADO_PRINT_1:
                         if (caracter == 'r') estadoActual = ESTADO_PRINT_2;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_PRINT_2:
                         if (caracter == 'i') estadoActual = ESTADO_PRINT_3;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_PRINT_3:
                         if (caracter == 'n') estadoActual = ESTADO_PRINT_4;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_PRINT_4:
                         if (caracter == 't') estadoActual = ESTADO_PRINT_5;
+                        else if (Character.isLetter(caracter) || caracter == ' ') estadoActual = ESTADO_IDENTIFICADORES;
                         else estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_PRINT_5:
                         if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1) {
                             contadorPalabrasReservadas++;
                             estadoActual = ESTADO_INICIAL;
-                        }else {
+                        }else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else {
                             estadoActual = ESTADO_INICIAL;
                         }
                         break;
@@ -770,8 +846,9 @@
                         break;
                     case ESTADO_ERROR:
                         if(caracter == ' ' || caracter == '\n' || caracter == '\t'){
+                            contadorErrores++;
                             estadoActual = ESTADO_INICIAL;
-                        }else{
+                        }else {
                             // Permanecer en el mismo estado mientras se detecten dígitos
                         }
                         break;
@@ -816,6 +893,16 @@
                     case ESTADO_LLAVE_CERRADA:
                             contadorLlaves++;
                             estadoActual = ESTADO_INICIAL;
+                        break;
+                    case ESTADO_IDENTIFICADORES:
+                        if (Character.isLetterOrDigit(caracter)) {
+                            // Mantenerse en el estado de identificadores
+                        } else if(caracter == '_'){
+                            //mantenerse en el estado actual
+                        } else if (caracter == ' ' || caracter == '\n' || caracter == '\t') {
+                            contadorIdentificadores++;
+                            estadoActual = ESTADO_INICIAL;
+                        }
                         break;
                 }
             }
