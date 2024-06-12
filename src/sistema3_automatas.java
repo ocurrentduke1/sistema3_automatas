@@ -105,6 +105,10 @@
                 contadorDecremento, contadorComentarioSimple, contadorEnteros,contadorParentesis,
                 contadorCadena, contadorComentarioBloque,contadorLlaves, contadorIdentificadores,
                 contadorErrores;
+        private boolean stateParentesis = false;
+        private boolean stateLlaves = false;
+        private boolean stateComentBox = false;
+        private boolean stateCadena = false;
 
         private JTextArea texto;
 
@@ -288,6 +292,7 @@
                         else if (caracter == '}') estadoActual = ESTADO_LLAVE_CERRADA;
                         else if (Character.isDigit(caracter)) estadoActual = ESTADO_NUMERO_ENTERO_DECIMAL_1;
                         else if (Character.isLetter(caracter)) estadoActual = ESTADO_IDENTIFICADORES;
+                        else if (caracter == ' ') estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_IF_INT_1:
                         if (caracter == 'f') estadoActual = ESTADO_IF_2;
@@ -687,8 +692,6 @@
                         } else if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
                             contadorAsignacion++;
                             estadoActual = ESTADO_INICIAL;
-                        }else {
-                            estadoActual = ESTADO_INICIAL;
                         }
                         break;
 
@@ -775,7 +778,7 @@
                     case ESTADO_ARITMETICO_RESTA_DECREMENTO_1:
                         if (caracter == '-') {
                             estadoActual = ESTADO_DECREMENTO_2;
-                        } else if(caracter == ' ' || caracter == '\n'){
+                        } else if(caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
                             contadorAritmetico++;
                             estadoActual = ESTADO_INICIAL;
                         }else if(Character.isDigit(caracter)){
@@ -797,6 +800,7 @@
                         if (caracter == '/') {
                             estadoActual = ESTADO_COMENTARIO_SIMPLE_2;
                         } else if(caracter == '*'){
+                            stateComentBox = true;
                             estadoActual = ESTADO_COMENTARIO_BLOQUE_1;
                         } else if (caracter == ' ' || caracter == '\n' || caracter == '\t' || i == caracteres.length - 1){
                             contadorAritmetico++;
@@ -854,14 +858,17 @@
                         break;
                     case ESTADO_PARENTESIS_ABIERTO:
                         contadorParentesis++;
+                        stateParentesis = true;
                         estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_PARENTESIS_CERRADO:
                         contadorParentesis++;
+                        stateParentesis = false;
                         estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_CADENA_ABIERTA:
                         if(caracter == '"'){
+                            stateCadena = true;
                             estadoActual = ESTADO_CADENA_CERRADA;
                         }else{
                             //continuar en este estado hasta encontrar otras comillas
@@ -869,6 +876,7 @@
                         break;
                     case ESTADO_CADENA_CERRADA:
                         contadorCadena++;
+                        stateCadena = false;
                         estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_COMENTARIO_BLOQUE_1:
@@ -881,6 +889,7 @@
                     case ESTADO_COMENTARIO_BLOQUE_2:
                         if(caracter == '/'){
                             contadorComentarioBloque++;
+                            stateComentBox = false;
                             estadoActual = ESTADO_INICIAL;
                         }else{
                             estadoActual = ESTADO_COMENTARIO_BLOQUE_1;
@@ -888,10 +897,12 @@
                         break;
                     case ESTADO_LLAVE_ABIERTA:
                             contadorLlaves++;
+                            stateLlaves = true;
                             estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_LLAVE_CERRADA:
                             contadorLlaves++;
+                            stateLlaves = false;
                             estadoActual = ESTADO_INICIAL;
                         break;
                     case ESTADO_IDENTIFICADORES:
@@ -905,6 +916,18 @@
                         }
                         break;
                 }
+            }
+            if(stateParentesis){
+                contadorErrores++;
+            }
+            if(stateLlaves){
+                contadorErrores++;
+            }
+            if(stateCadena){
+                contadorErrores++;
+            }
+            if(stateComentBox){
+                contadorErrores++;
             }
         }
 
